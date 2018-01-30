@@ -1,0 +1,8 @@
+{
+  "name": "CroosTest",
+  "app_id": "442383cd",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
