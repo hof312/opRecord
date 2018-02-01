@@ -90,12 +90,12 @@ export class HomePage {
         
                       
     this.InputForm = new FormGroup({
-            Spindle_speed:new FormControl('24000', [Validators.required]),
-            Number_of_teeth:new FormControl('4', [Validators.required]),
+            Spindle_speed:new FormControl('636.6', [Validators.required]),
+            Number_of_teeth:new FormControl('12', [Validators.required]),
             Tool_diameter:new FormControl('50', [Validators.required]),
-            Max_spindle_rpm:new FormControl('50000', [Validators.required]),
-            Max_insert_vc:new FormControl('8000', [Validators.required]),
-            Min_insert_vc:new FormControl('2000', [Validators.required]),
+            Max_spindle_rpm:new FormControl('10000', [Validators.required]),
+            Max_insert_vc:new FormControl('300', [Validators.required]),
+            Min_insert_vc:new FormControl('50', [Validators.required]),
             
           });
           console.log(this.InputFormSet.value.Tf*Math.pow(2,Math.floor(Math.log2(this.fs))/this.fs),         
@@ -113,10 +113,13 @@ export class HomePage {
       
 /*********************************************Backgroung******************************************************************/
       var filenameB ="recBackgroung.wav" ,filenameM = "recMacining.wav";
-   //   if( this.platform.is("android"))
-        this.filePath = this.file.externalDataDirectory;
-   /* else  if( this.platform.is("ios"))
-        this.filePath = this.file.tempDirectory;*/
+    
+
+        if (this.platform.is('ios')) {
+          this.filePath = this.file.documentsDirectory.replace(/file:\/\//g, '');
+        } else if (this.platform.is('android')) {
+          this.filePath = this.file.externalDataDirectory;
+        }
       var self = this;
       this.file.readAsArrayBuffer(this.filePath ,filenameB)
       .then(ArrBuf => {
@@ -292,11 +295,11 @@ export class HomePage {
               for (var i=0,j=0; i<L-1; i+=Math.round(L/7000)+1,j++){
                 dataM1[j] = {//x:time,y:chatter_sound
                   x:time[i],
-                  y:chatter_sound[i]*Math.pow(2,8)/10
+                  y:chatter_sound[i]//*Math.pow(2,8)/10
                 }
                 dataB1[j] = {//x:time,y:noise
                   x:time[i],
-                  y:noise[i]*Math.pow(2,8)/10
+                  y:noise[i]//*Math.pow(2,8)/10
                 }
               }
               for (var i=0,j=0; i<L/2; i+=Math.round((L/2)/8000)+1,j++){
@@ -370,14 +373,15 @@ export class HomePage {
      var self1 = this;
      this.platform.ready().then((src) => {
         this.fileName = 'recBackgroung.wav';
-       // if( this.platform.is("android"))
-         this.filePath = this.file.externalDataDirectory + this.fileName;
-      /* else if( this.platform.is("ios"))
-         this.filePath = this.file.tempDirectory + this.fileName;*/
-        this.audio_background = this.media.create(this.filePath);
+        if (this.platform.is('ios')) {
+          this.filePath = this.file.documentsDirectory.replace(/file:\/\//g, '') + this.fileName;
+          this.audio_background = this.media.create(this.filePath);
+        } else if (this.platform.is('android')) {
+          this.filePath = this.file.externalDataDirectory + this.fileName;
+          this.audio_background = this.media.create(this.filePath);
+        }
         this.audio_background.onSuccess.subscribe(() => {
           console.log('create media is successful');
-         // alert("finish recording");
           this.recording_B = false;
         });
         var self =this;
@@ -390,8 +394,7 @@ export class HomePage {
         setTimeout(function(){
           self.audio_background.stopRecord();
           self.audio_background.release();
-        }, self1.Tf);
-        //alert("recordin..");
+        }, 3000);
       
       }).catch((err) => {console.log("error in platform:"+err);});
     }
@@ -402,26 +405,27 @@ export class HomePage {
 
       this.platform.ready().then((src) => {
         this.fileName = 'recMacining.wav';
-        //if( this.platform.is("android"))
-        this.filePath = this.file.externalDataDirectory + this.fileName;
-      /* else if( this.platform.is("ios"))
-          this.filePath = this.file.tempDirectory + this.fileName;*/
-        this.audio_machining = this.media.create(this.filePath);
+
+        if (this.platform.is('ios')) {
+          this.filePath = this.file.documentsDirectory.replace(/file:\/\//g, '') + this.fileName;
+          this.audio_machining = this.media.create(this.filePath);
+        } else if (this.platform.is('android')) {
+          this.filePath = this.file.externalDataDirectory + this.fileName;
+          this.audio_machining = this.media.create(this.filePath);
+        }
         var self =this;
         this.audio_machining.onSuccess.subscribe(() => {
           console.log('create media is successful');
-          //alert("finish recording");
           this.recording_M = false;
         });
         this.audio_machining.onError.subscribe(error => console.log('Error!', error));
         this.audio_machining.startRecord();
         this.recording_M = true;
         this.r_M = true;
-       // alert("recordin..");
        setTimeout(function(){
         self.audio_machining.stopRecord();
         self.audio_machining.release();
-      }, this.Tf);    
+      }, 3000);    
       }).catch((err) => {console.log("error in platform:"+err);});
     
     }
