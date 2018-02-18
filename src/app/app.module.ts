@@ -10,6 +10,7 @@ import { ShareService } from '../ShareService';
 import { Media } from '@ionic-native/media';
 import { File } from '@ionic-native/file';
 
+
 @NgModule({
   declarations: [
     MyApp,

@@ -1,11 +1,11 @@
 page-home {
+.labelC { float: left; width: 10em; margin-right: -15px; text-align: left; color:#999}
 
-.my-item {
-   max-height: 3px;
-        
-    }
+
 .My_button{
     text-transform: none;
+    font-size: 12px;
+    
     background-color: rgb(89, 235, 104);
     color: black;
 }
@@ -17,16 +17,32 @@ page-home {
 
 }
 
+.my-segment.segment-button.segment-activated{
+        color:rgb(51, 141, 35);
+        font-size: 16px;
+        border-color: #48ff76;
+        background-color: white;
+}
+
+.MyToast{
+    > div{
+        background-color:white!important;
+       
+    }
+}
+.alertCustom{
+    > div{
+        border-radius: 25px;
+        height: 150px;
+    }
+}
+
 /******************************************android********************************/
 .alertCustom.alert-md.alert-wrapper{
 border-radius: 25px;
 height: 150px;
 }
-.my-segment.segment-button.segment-activated{
-        color:rgb(51, 141, 35);
-        font-size: 16px;
-        border-color: #48ff76;
-}
+
 .ion-segment-button.my-segment.segment-md.segment-button{
     color:rgb(51, 141, 35);
     font-size: 16px;
@@ -36,15 +52,18 @@ height: 150px;
     color: #0fa735;
 }
 
-.MyToast{
-    > div{
-        background-color:white!important;
-    }
-}
-.alertCustom{
-    > div{
-        border-radius: 25px;
-        height: 150px;
-    }
-}
+
 /******************************************ios********************************/
+.alertCustom.alert-ios.alert-wrapper{
+    border-radius: 25px;
+    height: 150px;
+    }
+    .segment-md.segment-button{
+        color:rgb(51, 141, 35);
+        
+    }
+    .segment-ios.segment-button {
+        color: #0fa735;
+    }
+    
+ 

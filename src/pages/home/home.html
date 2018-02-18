@@ -1,10 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-        <!--<button data-toggle="tooltip" title="Setting" (click)="setSetting()" >
-          <ion-icon name="settings" md="md-settings"></ion-icon>
-        </button>-->
-        Optimization Speed
+        Optimization machining noise
     </ion-title>
   </ion-navbar>
 </ion-header>
@@ -14,6 +11,7 @@
     <div padding>
         <ion-segment [(ngModel)]="categories">
             <ion-segment-button value='home' class="my-segment">
+            <ion-icon name="home"></ion-icon>
             Home
             </ion-segment-button>
           <ion-segment-button value='setting' class="my-segment">
@@ -28,164 +26,114 @@
         <ion-list *ngSwitchCase="'home'" >
         <form [formGroup]="InputForm" class="form-inline">
             <ion-list class="my-ion-list">
-                <ion-item class="my-item">
-                <ion-label style="padding-right: 25px">Tool diameter :</ion-label>
-                <ion-input type="number"  formControlName="Tool_diameter"></ion-input>
-                <ion-note item-end>(mm)</ion-note>
-            </ion-item>
-        
                 <ion-item>
-                <ion-label style="padding-right: 2px">Max. spindle rpm :</ion-label>
-                <ion-input type="number" formControlName="Max_spindle_rpm"></ion-input>
-                <ion-note item-end>(rpm)</ion-note>
+                    <ion-label class="labelC">Tool diameter :</ion-label>
+                    <ion-input class="inputC" type="number"  formControlName="Tool_diameter"></ion-input>
+                    <ion-note item-end>(mm)</ion-note>
                 </ion-item>
         
                 <ion-item>
-                    <ion-label style="padding-right: 23px">Max. insert Vc :</ion-label>
-                    <ion-input type="number" formControlName="Max_insert_vc"></ion-input>
-                    <ion-note item-end>(m/min)</ion-note>
-                </ion-item>
-        
-                <ion-item>
-                    <ion-label  style="padding-right: 27px">Min insert Vc :</ion-label>
-                    <ion-input type="number" formControlName="Min_insert_vc"></ion-input>
-                    <ion-note item-end>(m/min)</ion-note>
-                </ion-item>
-        
-                <ion-item>
-                    <ion-label  style="padding-right: 23px">Spindle speed :</ion-label>
-                    <ion-input type="number" formControlName="Spindle_speed"></ion-input>
+                    <ion-label class="labelC" >Max. spindle rpm :</ion-label>
+                    <ion-input class="inputC" type="number" formControlName="Max_spindle_rpm"></ion-input>
                     <ion-note item-end>(rpm)</ion-note>
                 </ion-item>
         
                 <ion-item>
-                    <ion-label  style="padding-right: 14px">Number of teeth :</ion-label>
-                    <ion-input type="number" formControlName="Number_of_teeth"></ion-input>
+                    <ion-label  class="labelC">Max. insert Vc :</ion-label>
+                    <ion-input  class="inputC" type="number" formControlName="Max_insert_vc"></ion-input>
+                    <ion-note item-end>(m/min)</ion-note>
+                </ion-item>
+        
+                <ion-item>
+                    <ion-label   class="labelC" >Min insert Vc :</ion-label>
+                    <ion-input class="inputC" type="number" formControlName="Min_insert_vc"></ion-input>
+                    <ion-note item-end>(m/min)</ion-note>
+                </ion-item>
+        
+                <ion-item>
+                    <ion-label   class="labelC" >Spindle speed :</ion-label>
+                    <ion-input  class="inputC" type="number" formControlName="Spindle_speed"></ion-input>
+                    <ion-note item-end>(rpm)</ion-note>
+                </ion-item>
+        
+                <ion-item>
+                    <ion-label   class="labelC" >Number of teeth :</ion-label>
+                    <ion-input  class="inputC" type="number" formControlName="Number_of_teeth"></ion-input>
                 </ion-item>
         
             </ion-list>
         </form>
         
-        <button class="My_button" ion-button icon-left  style="width: 160px;" (click)="Record_background()" round [style.color] = "recording_B ? 'red' : '' "><ion-icon name="mic"></ion-icon>Record (background)</button>        
-        <button class="My_button" ion-button icon-right  style="width: 205px;" (click)="Rrcord_During_machining()" round [style.color] = "recording_M ? 'red' : '' "><ion-icon name="mic"></ion-icon>&nbsp;Record (during machining)</button>            
-        <button class="My_button" ion-button full  (click)="calc_optimum()"  round> Get recommended spindle rmp</button>
+        
+        <button class="My_button" ion-button icon-left  style="width: 42%;" (click)="Record_background()" round [style.color] = "recording_B ? 'red' : 'black' "><ion-icon name="mic"></ion-icon>Record (background)</button>        
+        <button class="My_button" ion-button icon-right  style="width: 54%; float: right" (click)="Rrcord_During_machining()" round [style.color] = "recording_M ? 'red' : 'black' "><ion-icon name="mic"></ion-icon>&nbsp;Record (during machining)</button>            
+        <button class="My_button" ion-button full  (click)="calc_optimum()"  round> Get recommended spindle rpm </button>
         <button class="My_button" ion-button full  (click)="calc_chart()"  round> plot noise spectrum</button>
-    
+
+        
+        <!--<button class="My_button" ion-button full  (click)="audioCapture()"  round>audio Capture</button>-->
+
+        
+
         <div [style.display] ="calcOp ? '':'none' ">
             <ion-card style=" box-shadow: 2px 2px 3px 3px rgb(164, 235, 153) ">
                 <ion-card-header>
-                    <b>The optimum values:</b>
+                    <h1><b>The optimum values:</b></h1>
                 </ion-card-header>
                 <ion-card-content>
-                    <p >{{optimum_n| number : '1.2-2'}} (rpm)</p>
-                    <p >{{optimum_Vc| number : '1.2-2'}} (m/min)</p>
+                    <b >Spindle speed:(rpm)</b> 
+                    <p *ngFor="let el of this.optimum_n index as i; first as isFirst">{{this.optimum_n[i] | number:'.1-2'}} </p>
+                    <b >Cutting speed:(m/min)</b>
+                    <p *ngFor="let el of this.optimum_Vc index as i; first as isFirst">{{this.optimum_Vc[i]  | number:'.1-2'}} </p>
                 </ion-card-content>
             </ion-card>
         </div>
-
-        <div  [style.display] ="calcCH ? '':'none' " >   
+        
+        <div  [style.display] ="calcCH ? '':'none' " style="margin-left: 5px;" >   
             <div id="container1" style="display: block; "></div>
-            <div id="container2" style="display: block;"	></div>
+            <div id="container2" style="display: block;">  </div>  
         </div>
     </ion-list>
 
     <ion-list *ngSwitchCase='"setting"' >
-        <form [formGroup]="InputFormSet" class="form-inline">
-            <ion-list>
-                <ion-item>
-                    <ion-label >time recording:</ion-label>
-                    <ion-select formControlName="Tf" >
-                        <ion-option value=1 >{{t1}}</ion-option>
-                        <ion-option value=2 >{{t2}}</ion-option>
-                        <ion-option value=4 >{{t3}}</ion-option>
-                        <ion-option value=8 >{{t4}}</ion-option>
-                    </ion-select>
-                </ion-item>
-        
-                <ion-item>
-                    <ion-label >SNR thredhold :</ion-label>
-                    <ion-input type="number"  formControlName="SNR_thredhold" text-right></ion-input>
-                </ion-item>
-        
-                <ion-item>
-                    <ion-label >n_error :</ion-label>
-                    <ion-input type="number"  formControlName="n_Err" text-right></ion-input>
-                </ion-item>
+      <form [formGroup]="InputFormSet" class="form-inline">
+         <ion-list>
+            <ion-item style="border-bottom-color: rgb(89, 235, 104);">
+                <ion-label  class="labelC">your sample rate is :</ion-label>
+                <ion-input [value]="this.fs" text-right readonly></ion-input>
+            </ion-item>
+            <!--<ion-item>
+                <ion-label >time for recording:</ion-label>
+                <ion-select formControlName="Tf" [(ngModel)]="this.Tf" >
+                    <ion-option value={{t1}}>{{t1}}</ion-option>
+                    <ion-option value={{t2}}>{{t2}}</ion-option>
+                    <ion-option value={{t3}}>{{t3}}</ion-option>
+                    <ion-option value={{t4}}>{{t4}}</ion-option>
+                </ion-select>
+            </ion-item>
+        -->
+            <ion-item> 
+                <label class="labelC">time for recording:</label>
+                <select formControlName="Tf" [(ngModel)]="this.Tf" style="float: right ; border-color:white">
+                    <option value={{t1}}>{{t1}}</option>
+                    <option value={{t2}}>{{t2}}</option>
+                    <option value={{t3}}>{{t3}}</option>
+                    <option value={{t4}}>{{t4}}</option>
+                </select>
+            </ion-item>
+            <ion-item>
+                <ion-label  class="labelC">SNR thredhold :</ion-label>
+                <ion-input type="number"  formControlName="SNR_thredhold" text-right></ion-input>
+            </ion-item>
+    
+            <ion-item>
+                <ion-label  class="labelC">Error rate:</ion-label>
+                <ion-input type="number"  formControlName="n_Err" text-right></ion-input>
+            </ion-item>
         
             </ion-list> 
         </form>
         </ion-list>
     </div>
-
-
-
-
-
- <!-- 
-<form [formGroup]="InputForm" class="form-inline">
-  <ion-list class="my-ion-list">
-      <ion-item class="my-item">
-        <ion-label style="padding-right: 25px">Tool diameter :</ion-label>
-        <ion-input type="number"  formControlName="Tool_diameter"></ion-input>
-        <ion-note item-end>(mm)</ion-note>
-    </ion-item>
-
-      <ion-item>
-        <ion-label style="padding-right: 2px">Max. spindle rpm :</ion-label>
-        <ion-input type="number" formControlName="Max_spindle_rpm"></ion-input>
-        <ion-note item-end>(rpm)</ion-note>
-      </ion-item>
-
-      <ion-item>
-          <ion-label style="padding-right: 23px">Max. insert Vc :</ion-label>
-          <ion-input type="number" formControlName="Max_insert_vc"></ion-input>
-          <ion-note item-end>(m/min)</ion-note>
-      </ion-item>
-
-      <ion-item>
-          <ion-label  style="padding-right: 27px">Min insert Vc :</ion-label>
-          <ion-input type="number" formControlName="Min_insert_vc"></ion-input>
-          <ion-note item-end>(m/min)</ion-note>
-      </ion-item>
-
-      <ion-item>
-          <ion-label  style="padding-right: 23px">Spindle speed :</ion-label>
-          <ion-input type="number" formControlName="Spindle_speed"></ion-input>
-          <ion-note item-end>(rpm)</ion-note>
-      </ion-item>
-
-      <ion-item>
-          <ion-label  style="padding-right: 14px">Number of teeth :</ion-label>
-          <ion-input type="number" formControlName="Number_of_teeth"></ion-input>
-      </ion-item>
-
-  </ion-list>
-</form>
-
-    <button class="My_button" ion-button icon-left  style="width: 160px;" (click)="Record_background()" round [style.color] = "recording_B ? 'red' : '' "><ion-icon name="mic"></ion-icon>Record (background)</button>
-    
-    <button class="My_button" ion-button icon-right  style="width: 205px;" (click)="Rrcord_During_machining()" round [style.color] = "recording_M ? 'red' : '' "><ion-icon name="mic"></ion-icon>&nbsp;Record (during machining)</button>
-    
-    <button class="My_button" ion-button full  (click)="calc_optimum()"  round> Get recommended spindle rmp</button>
-    <button class="My_button" ion-button full  (click)="calc_chart()"  round> plot noise spectrum</button>
-     
-   <!-- <div [style.display] ="calcOp ? '':'none' ">
-            <ion-card style=" box-shadow: 2px 2px 3px 3px rgb(164, 235, 153) ">
-                <ion-card-header>
-                    <b>The optimum values:</b>
-                </ion-card-header>
-                <ion-card-content>
-                    <p >{{optimum_n| number : '1.2-2'}} (rpm)</p>
-                    <p >{{optimum_Vc| number : '1.2-2'}} (m/min)</p>
-                </ion-card-content>
-            </ion-card>
-        </div>
-    -->
-<!--    <div  [style.display] ="calcCH ? '':'none' " >   
-      <div id="container1" style="display: block; "></div>
-      <div id="container2" style="display: block;"	></div>
-    </div>
--->
-    
     
 </ion-content>
