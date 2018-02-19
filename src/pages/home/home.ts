@@ -4,7 +4,6 @@ import { Media, MediaObject } from '@ionic-native/media';
 import { File } from '@ionic-native/file';
 import { ShareService } from '../../ShareService';
 import {FormControl , FormGroup , Validators  } from '@angular/forms';
-//import { SetingPage } from '../seting/seting';
 import * as HighCharts from 'highcharts';
 import { Chart } from "Highcharts";
 import * as Complex  from 'complex-js';
@@ -25,7 +24,8 @@ export class HomePage {
   r_M: boolean = false;
   recording_M: boolean = false;
   recording_B: boolean = false;
-  calcCH: boolean = false;
+  calcCHf: boolean = false;
+  calcCHn: boolean = false;
   calcOp: boolean = false;
   
   audioSoundret: Array<Complex> ;
@@ -48,6 +48,7 @@ export class HomePage {
   Tool_diameter;  Min_insert_vc;  Number_of_teeth;
   SNR;   snr;  Max_insert_vc;  Max_spindle_rpm;
   time =[]; fc=0; fcx=0; optimum_n=[];  optimum_Vc=[];
+  optimum_nt=[];  optimum_Vct=[];
   categories = "home";
 
   constructor(public navCtrl: NavController,public navParams: NavParams,
@@ -69,7 +70,7 @@ export class HomePage {
   this.InputFormSet = new FormGroup({
     Tf:new FormControl(this.t2, [Validators.required]),
     SNR_thredhold:new FormControl(2, [Validators.required]),
-    n_Err:new FormControl(1/100, [Validators.required])
+    n_Err:new FormControl(1, [Validators.required])
     });
         
                       
@@ -98,6 +99,11 @@ export class HomePage {
       this.presentAlert("you must recording first!");
       return;
     }
+    if(+this.InputForm.value.Min_insert_vc > +this.InputForm.value.Max_insert_vc){
+      this.presentAlert("The max Vc must be bigger then min Vc!");
+      return;
+    }
+
 /*********************************************Backgroung******************************************************************/
       var filenameB ="recBackgroung.wav" ,filenameM = "recMacining.wav";
       if (this.platform.is('ios')) {
@@ -113,8 +119,8 @@ export class HomePage {
           source.buffer = dataB; 
          //get the data in PCM format (sampel rate = 48,000 per second)
          var Backgroundnoise:Float32Array = new Float32Array(dataB.getChannelData(0));
-         var f1 = new File();
-         f1.writeFile(f1.externalDataDirectory,"Backgroundnoise.txt",Backgroundnoise.toString());
+       /*  var f1 = new File();
+         f1.writeFile(f1.externalDataDirectory,"Backgroundnoise.txt",Backgroundnoise.toString());*/
 /**********************************************Macining******************************************************************/
         self.file.readAsArrayBuffer(self.filePath ,filenameM)
         .then(ArrBuf => {
@@ -123,38 +129,19 @@ export class HomePage {
             source.buffer = dataM; 
             //get the data in PCM format (sampel rate = 48,000 per second)
             var Maciningnoise:Float32Array = new Float32Array(dataM.getChannelData(0));
-            var f2 = new File();
+            /*var f2 = new File();
             f2.writeFile(f2.externalDataDirectory,"Maciningnoise.txt",Maciningnoise.toString());
-          
+          */
             self.fs = dataM.sampleRate;
             self.Tf = self.InputFormSet.value.Tf;         
             self.semples = Math.pow(self.Tf*2,Math.floor(Math.log2(self.fs))); 
             var snr = +self.InputFormSet.value.SNR_thredhold;
-            var n_err = +self.InputFormSet.value.n_Err;
+            var n_err = +self.InputFormSet.value.n_Err/100;
             var noise:Float32Array ,chatter_sound:Float32Array;
             noise = Backgroundnoise;
             chatter_sound = Maciningnoise;
             
             var L = Backgroundnoise.length;
-            
-            /*var j=0;
-            while(Backgroundnoise[j]==0)
-                j++;
-            console.log("j",j);
-            for(var i=0; (i<L)&&(j+i<L); i++)
-            {
-              noise[i] = Backgroundnoise[j+i];
-            }
-            j=0;
-            L = Maciningnoise.length;
-            while(Maciningnoise[j]==0)
-                j++;
-            console.log("j",j);
-            for(i=0; (i<L)&&(j+i<L); i++)
-            {
-              chatter_sound[i] = Maciningnoise[i+j];
-            } */
-
 
             //verify that the length of recording is power of 2 for the FFT
             var k = Math.floor(Math.log2(L))
@@ -248,7 +235,6 @@ export class HomePage {
             /******************************************If press on 'get optimum'**************************************************** */
             if(press == "O")
             {
-              console.log("1");
             //norm:
             for( i=0; i<L; i++ ){
               sum += Math.pow(Math.abs(noise_t1[i]),2);
@@ -256,77 +242,72 @@ export class HomePage {
             }
             Background_rms = Math.sqrt(sum/L);
             chatter_sound_rms = Math.sqrt(sum1/L);
-            SNR = 20*Math.log10(chatter_sound_rms/Background_rms);
-            console.log("1");
-            
-         /*   i1=0;
-            while(i1 <= L/2)
-            {
-              if( (f[i1] <= TPF*(1+TPF_err)) && (f[i1] >= TPF*(1-TPF_err)) )
-                FFT_chatter_amp[i1] = 0;
-              else if( (f[i1] <= 2*TPF*(1+TPF_err)) && (f[i1] >= 2*TPF*(1-TPF_err)) )
-                FFT_chatter_amp[i1] = 0;
-              else if( (f[i1] <= 3*TPF*(1+TPF_err)) && (f[i1] >= 3*TPF*(1-TPF_err)) )
-              FFT_chatter_amp[i1] = 0;
-                else if( (f[i1] <= 4*TPF*(1+TPF_err)) && (f[i1] >= 4*TPF*(1-TPF_err)) )
-                FFT_chatter_amp[i1] = 0;
-              else if( (f[i1] <= 5*TPF*(1+TPF_err)) && (f[i1] >= 5*TPF*(1-TPF_err)) )
-                FFT_chatter_amp[i1] = 0;
-              i1++;
-            }
-            var max = FFT_chatter_amp[0];
-            for( i=1; i<FFT_chatter_amp.length; i++ ){
-              if(FFT_chatter_amp[i] > max){
-                max = FFT_chatter_amp[i] ;
-                index = i;
-                }
-            }
-            fc = f[index];
-            console.log("max fc",fc);*/
+            SNR = 20*Math.log10(chatter_sound_rms/Background_rms);    
             j_max = 60*self.fc*Math.PI*Tool_diameter/(Min_insert_vc*1000*Number_of_teeth);
             i1=1;
             while(i1 < j_max)
               i1++;
             var j1=0;
-            console.log("1");
             if(SNR > snr){
               tmp_n = 60*self.fc/(Number_of_teeth*i1);
               tmp_Vc = tmp_n*Math.PI*Tool_diameter/1000;
-              while( (tmp_Vc <= Max_insert_vc) && (tmp_n <= Max_spindle_rpm) && (i1 >= 1) ){
-                self.optimum_n[i1] = tmp_n;
-                self.optimum_Vc[i1] = tmp_Vc;
+              console.log(tmp_n,tmp_Vc);
+              while( (tmp_Vc <= Max_insert_vc) && (tmp_n <= Max_spindle_rpm) && (i1 >= 1)){
+                self.optimum_n[j1] = tmp_n;
+                self.optimum_Vc[j1] = tmp_Vc;
                 j1++;
                 i1--;
                 tmp_n = 60*self.fc/(Number_of_teeth*i1);
                 tmp_Vc = tmp_n*Math.PI*Tool_diameter/1000;
+                console.log(self.optimum_n[i1+1],self.optimum_Vc[i1+1]);
               }
-              console.log("while end",j1);
-              //show the optimum values:
-             /* for(i=0 ; i<j1 ; i++){
-                if(self.checkNumOfPoint(self.optimum_n[i]) > 2){
-                  self.optimum_n[i] = +self.optimum_n[i].toFixed(2);
-                }
-                if(self.checkNumOfPoint(self.optimum_Vc[i])>2){
-                  self.optimum_Vc[i] = +self.optimum_Vc[i].toFixed(2);
-                }
-              }
-              console.log("for end");*/
               console.log(self.optimum_n,self.optimum_Vc);
-            self.presentAlertForOptimom(self.optimum_n,self.optimum_Vc);
-            }
-              else
-                self.presentAlert("No chatter detected");
-           
+               //show the optimum values:
+               console.log(i1,j1);
+               if(i1>1){
+                self.optimum_nt = [];
+                self.optimum_Vct = [];
+                 for(var i= 0 ;(i<5)&&(i<=j1) ; i++){
+                   self.optimum_nt[i] = self.optimum_n[i];
+                   self.optimum_Vct[i] = self.optimum_Vc[i];
+                 }
+                 console.log(self.optimum_nt,self.optimum_Vct);
+               }
+               /*If we dont get optimum values - take the extreme points */
+               else{
+                self.optimum_nt = [];
+                self.optimum_Vct = [];
+                console.log(Max_insert_vc*1000/(Math.PI * Tool_diameter) ,Max_spindle_rpm);
+                 self.optimum_nt[0] = Math.min( (Max_insert_vc*1000/(Math.PI * Tool_diameter)),Max_spindle_rpm );
+                 self.optimum_nt[1] = Min_insert_vc*1000/(Math.PI*Tool_diameter);
+                 self.optimum_Vct[0] = self.optimum_nt[0]*Math.PI*Tool_diameter/1000;
+                 self.optimum_Vct[1] = self.optimum_nt[1]*Math.PI*Tool_diameter/1000
+                 console.log(self.optimum_nt,self.optimum_Vct);
+               }
+               self.presentAlertForOptimom(self.optimum_nt,self.optimum_Vct);
+              }
+            else
+              self.presentAlert("No chatter detected");
           }
  
         /******************************************If press on 'get chart'**************************************************** */
         else{ 
-          if(press == "C")
+          if(press == "Cn")
             {
-              var s2=0,max=FFT_chatter_amp[0],ind=self.fcx; 
               /** calculet the datd for chart - start **/
-              var dataB1 =[],dataB2=[], dataM1 =[],dataM2=[], iprev=0;
-              for ( i=0,j=0; i<L-1; i+=Math.round(L/7000)+1,j++ ){
+              var dataB1 =[], dataM1 =[];
+            /*  for ( i=0,j=0; i<L-1; i+=Math.round(L/7000)+1,j++ ){
+                dataM1[j] = {//x:time,y:chatter_sound
+                  x:time[i],
+                  y:chatter_sound[i]
+                }
+                dataB1[j] = {//x:time,y:noise
+                  x:time[i],
+                  y:noise[i]
+                }
+              }*/
+
+              for ( i=L/8,j=0; i<L/4; i++,j++ ){
                 dataM1[j] = {//x:time,y:chatter_sound
                   x:time[i],
                   y:chatter_sound[i]
@@ -336,6 +317,15 @@ export class HomePage {
                   y:noise[i]
                 }
               }
+
+              self.showChart("Time(sec)","Noise amplitude",dataB1,dataM1,"container1");
+              /** calculet the datd for chart - end **/
+            }
+            else if(press == "Cf")
+            {
+              var max=FFT_chatter_amp[0],ind=self.fcx; 
+              /** calculet the datd for chart - start **/
+              var dataB2=[],dataM2=[];
               var notdone = true;
               for ( i=0,j=0; (i<L/2); i+=Math.round((L/2)/8000)+1,j++ ){
                //insert in forse the max value to the chart
@@ -362,14 +352,13 @@ export class HomePage {
                   y:FFT_noise_amp[i]
                 }
               }
-              self.showChart("Time(sec)","Noise amplitude",dataB1,dataM1,"container1");
+              console.log("fft chart",dataB2,dataM2);
               self.showChart1("Frequency(Hz)","|FFT of nosie amplitude|",dataB2,dataM2,"container2",self.fs/2,f[ind],FFT_chatter_amp[ind]);
               /** calculet the datd for chart - end **/
             }
           }
        // });//end resample M
-        },function(e){ console.log("Error with decoding audio dataM" + e.err); }); 
-        //  source.connect(self.audioCtxM.destination);   
+        },function(e){ console.log("Error with decoding audio dataM" + e.err); });   
         }).catch(e=>{
           console.log("fail to get data as arraybuffer M");
           return null;
@@ -403,17 +392,25 @@ export class HomePage {
         toast.present();
         console.log( this.optimum_n );
         this.calcOp = true;
-        this.calcCH = false;  
+        this.calcCHf = false;  
+        this.calcCHn = false; 
     }
 
     calc_optimum(){
       this.get_recomend_spindle_RMP("O");
     }
 
-    calc_chart(){
+    calc_chart_noise(){
       this.calcOp = false;
-      this.calcCH = true;  
-      this.get_recomend_spindle_RMP("C");
+      this.calcCHn = true;
+      this.calcCHf = false;  
+      this.get_recomend_spindle_RMP("Cn");
+    }
+    calc_chart_fft(){
+      this.calcOp = false;
+      this.calcCHf = true; 
+      this.calcCHn = false; 
+      this.get_recomend_spindle_RMP("Cf");
     
     }
 
@@ -430,10 +427,10 @@ export class HomePage {
           this.filePath = this.file.externalDataDirectory + this.fileName;
           this.audio_background = this.media.create(this.filePath);
         }
-      //this.audio_background.setRate(8000);
         this.audio_background.onSuccess.subscribe(() => {
           console.log('create media is successful');
           this.recording_B = false;
+          alert("the recording finish and save at:"+this.filePath);
         });
         var self =this;
         this.audio_background.onError.subscribe(error => console.log('Error!', error));
@@ -467,6 +464,7 @@ export class HomePage {
         this.audio_machining.onSuccess.subscribe(() => {
           console.log('create media is successful');
           this.recording_M = false;
+          alert("the recording finish and save at:"+this.filePath);
         });
         this.audio_machining.onError.subscribe(error => console.log('Error!', error));
         this.audio_machining.startRecord();
@@ -492,7 +490,7 @@ export class HomePage {
         useGPUTranslations: true
       },
       title: {
-          text: 'Plot Results'
+          text: 'Time series'
       },
       xAxis:
      {
@@ -529,6 +527,16 @@ export class HomePage {
         color: 'rgb(0, 179, 250)' 
     }]
         });
+        this.ChartFFT.renderer.label(
+          'Displays only a partial graph ' + '<br/>'  ,
+             90,
+             10
+         )
+             .attr({
+                 fill: '#FCFFC5',
+                 zIndex: 8
+             })
+             .add();
     }
 
     showChart1(x_titel,y_titel,dataB,dataM,name,size,x,y){
@@ -545,7 +553,7 @@ export class HomePage {
            useGPUTranslations: true
          },
          title: {
-             text: 'Plot Results'
+             text: 'Frequency spectrum'
          },
          xAxis: {
              max: size+1000,

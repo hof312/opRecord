@@ -3,7 +3,7 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
-import { SetingPage } from '../pages/seting/seting';
+
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { ShareService } from '../ShareService';
@@ -14,8 +14,7 @@ import { File } from '@ionic-native/file';
 @NgModule({
   declarations: [
     MyApp,
-    HomePage,
-    SetingPage
+    HomePage
   ],
   imports: [
     BrowserModule,
@@ -24,8 +23,7 @@ import { File } from '@ionic-native/file';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage,
-    SetingPage
+    HomePage
   ],
   providers: [
     StatusBar,

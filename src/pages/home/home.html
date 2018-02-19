@@ -1,6 +1,7 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
+        <img src="./assets/Iscar-logo.jpg" width="100px" />
         Optimization machining noise
     </ion-title>
   </ion-navbar>
@@ -67,13 +68,10 @@
         
         <button class="My_button" ion-button icon-left  style="width: 42%;" (click)="Record_background()" round [style.color] = "recording_B ? 'red' : 'black' "><ion-icon name="mic"></ion-icon>Record (background)</button>        
         <button class="My_button" ion-button icon-right  style="width: 54%; float: right" (click)="Rrcord_During_machining()" round [style.color] = "recording_M ? 'red' : 'black' "><ion-icon name="mic"></ion-icon>&nbsp;Record (during machining)</button>            
+        <button class="My_button" ion-button icon-left  style="width: 42%;" (click)="calc_chart_noise()"  round> Plot time series</button>
+        <button class="My_button" ion-button icon-right  style="width: 54%; float: right" (click)="calc_chart_fft()"  round> Plot frequency spectrum</button>
         <button class="My_button" ion-button full  (click)="calc_optimum()"  round> Get recommended spindle rpm </button>
-        <button class="My_button" ion-button full  (click)="calc_chart()"  round> plot noise spectrum</button>
-
-        
-        <!--<button class="My_button" ion-button full  (click)="audioCapture()"  round>audio Capture</button>-->
-
-        
+   
 
         <div [style.display] ="calcOp ? '':'none' ">
             <ion-card style=" box-shadow: 2px 2px 3px 3px rgb(164, 235, 153) ">
@@ -81,16 +79,29 @@
                     <h1><b>The optimum values:</b></h1>
                 </ion-card-header>
                 <ion-card-content>
-                    <b >Spindle speed:(rpm)</b> 
-                    <p *ngFor="let el of this.optimum_n index as i; first as isFirst">{{this.optimum_n[i] | number:'.1-2'}} </p>
-                    <b >Cutting speed:(m/min)</b>
-                    <p *ngFor="let el of this.optimum_Vc index as i; first as isFirst">{{this.optimum_Vc[i]  | number:'.1-2'}} </p>
+                        <ion-grid>
+                                <ion-row>
+                                  <ion-col>
+                                        <b >Spindle speed:(rpm)</b> 
+                                        <p *ngFor="let el of this.optimum_n index as i; first as isFirst " >{{this.optimum_nt[i] | number:'.0-0'}} </p>
+                                  </ion-col>
+                                  <ion-col>
+                                        <b >Cutting speed:(m/min)</b>
+                                        <p *ngFor="let el of this.optimum_Vc index as i; first as isFirst">{{this.optimum_Vct[i]  | number:'.0-0'}} </p>
+                                  </ion-col>
+                                </ion-row>
+                        </ion-grid>
+                    
+                    
                 </ion-card-content>
             </ion-card>
         </div>
         
-        <div  [style.display] ="calcCH ? '':'none' " style="margin-left: 5px;" >   
-            <div id="container1" style="display: block; "></div>
+        <div  [style.display] ="calcCHn ? '':'none' " style="margin-left: 5px;" >   
+            <div id="container1" style="display: block; "></div>   
+        </div>
+
+        <div  [style.display] ="calcCHf ? '':'none' " style="margin-left: 5px;" >   
             <div id="container2" style="display: block;">  </div>  
         </div>
     </ion-list>
@@ -99,7 +110,7 @@
       <form [formGroup]="InputFormSet" class="form-inline">
          <ion-list>
             <ion-item style="border-bottom-color: rgb(89, 235, 104);">
-                <ion-label  class="labelC">your sample rate is :</ion-label>
+                <ion-label  class="labelC">Sample rate (HZ):</ion-label>
                 <ion-input [value]="this.fs" text-right readonly></ion-input>
             </ion-item>
             <!--<ion-item>
@@ -113,8 +124,8 @@
             </ion-item>
         -->
             <ion-item> 
-                <label class="labelC">time for recording:</label>
-                <select formControlName="Tf" [(ngModel)]="this.Tf" style="float: right ; border-color:white">
+                <label class="labelC">time for recording (sec):</label>
+                <select formControlName="Tf" [(ngModel)]="this.Tf" style="float: right ; border-color:white; background-color:white" >
                     <option value={{t1}}>{{t1}}</option>
                     <option value={{t2}}>{{t2}}</option>
                     <option value={{t3}}>{{t3}}</option>
@@ -127,8 +138,9 @@
             </ion-item>
     
             <ion-item>
-                <ion-label  class="labelC">Error rate:</ion-label>
-                <ion-input type="number"  formControlName="n_Err" text-right></ion-input>
+                <ion-label  class="labelC">RPM error:</ion-label>
+                <ion-input  type="number"  formControlName="n_Err" text-right ></ion-input>
+                <ion-note item-end style="color:black; margin-left:0%">%</ion-note>
             </ion-item>
         
             </ion-list> 
